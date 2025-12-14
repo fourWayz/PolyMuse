@@ -1,65 +1,159 @@
-import Image from "next/image";
+"use client"
+
+import { motion } from 'framer-motion'
+import { Sparkles, Palette, Zap, Shield } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import ArtCanvas from '@/components/3d/ArtCanvas'
+import { GenerateArtForm } from '@/components/forms/GenerateArtForm'
+import { Gallery } from '@/components/gallery/Gallery'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { injected } from 'wagmi/connectors'
+
+const features = [
+  {
+    icon: Sparkles,
+    title: "AI-Powered Generation",
+    description: "Create unique art with cutting-edge AI models"
+  },
+  {
+    icon: Palette,
+    title: "Style Blending",
+    description: "Mix and match artistic styles for unique creations"
+  },
+  {
+    icon: Zap,
+    title: "Instant Minting",
+    description: "Mint directly to Polygon with gas-efficient lazy minting"
+  },
+  {
+    icon: Shield,
+    title: "Royalties Protection",
+    description: "Earn 5% royalties on all secondary sales"
+  }
+]
 
 export default function Home() {
+  const { address, isConnected } = useAccount()
+  const { connect } = useConnect()
+  const { disconnect } = useDisconnect()
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white">
+      {/* Navigation */}
+      <nav className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2"
+          >
+            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600" />
+            <span className="text-2xl font-bold">AI Art Studio</span>
+          </motion.div>
+          
+          <div className="flex items-center gap-4">
+            {isConnected ? (
+              <>
+                <span className="text-sm bg-white/10 px-3 py-1 rounded-full">
+                  {address?.slice(0, 6)}...{address?.slice(-4)}
+                </span>
+                <Button variant="ghost" onClick={() => disconnect()}>
+                  Disconnect
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="gradient" 
+                onClick={() => connect({ connector: injected() })}
+              >
+                Connect Wallet
+              </Button>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h1 className="text-6xl font-bold mb-6 leading-tight">
+              Create <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">AI-Powered</span> NFT Art
+            </h1>
+            <p className="text-xl text-gray-300 mb-8">
+              Generate stunning digital art with AI, mint directly on Polygon Amoy, 
+              and earn royalties from your creations.
+            </p>
+            <div className="flex gap-4">
+              <Button size="lg" variant="gradient">
+                Start Creating
+              </Button>
+              <Button size="lg" variant="outline">
+                Explore Gallery
+              </Button>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+            className="relative"
+          >
+            <div className="absolute -inset-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur-2xl opacity-30" />
+            <ArtCanvas imageUrl="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&auto=format&fit=crop" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="container mx-auto px-6 py-20">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl font-bold mb-4">Powerful Features</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Everything you need to create, mint, and manage your AI-generated NFT art
           </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -10 }}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 transition-all"
+            >
+              <feature.icon className="h-12 w-12 text-purple-500 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-400">{feature.description}</p>
+            </motion.div>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Art Generation Form */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <GenerateArtForm />
         </div>
-      </main>
+      </section>
+
+      {/* Gallery */}
+      <section className="container mx-auto px-6 py-20">
+        <Gallery />
+      </section>
     </div>
-  );
+  )
 }
