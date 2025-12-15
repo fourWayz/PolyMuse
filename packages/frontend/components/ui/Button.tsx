@@ -40,6 +40,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, loading, children, ...props }, ref) => {
+    const { onDrag, onDragStart, onDragEnd, ...restProps } = props as any
     return (
       <motion.button
         className={cn(buttonVariants({ variant, size, className }))}
@@ -47,7 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         disabled={loading}
-        {...props}
+        {...restProps}
       >
         {loading ? (
           <div className="flex items-center gap-2">
