@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Filter, Grid3x3, List, Heart, Share2, Eye, Sparkles, TrendingUp, Clock, Palette, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { useAccount, useReadContract } from 'wagmi'
 import { CONTRACT_ADDRESS, aiArtNFTAbi } from '@/lib/web3'
 import Image from 'next/image'
+import { Abi } from 'viem'
 
 // Mock data 
 const MOCK_ARTWORKS = [
@@ -157,22 +158,65 @@ export function Gallery() {
   const [sortBy, setSortBy] = useState("newest")
   const [selectedArt, setSelectedArt] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  
+  const [isLoading, setIsLoading] = useState(true)
+
   const { address } = useAccount()
-  
-  // Fetch actual NFTs from contract
-  const { data: totalSupply } = useReadContract({
-    address: CONTRACT_ADDRESS,
-    abi: aiArtNFTAbi,
-    functionName: 'totalSupply',
+
+
+  // Get the next token ID to know how many tokens exist
+  const { data: nextTokenId } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: aiArtNFTAbi as Abi,
+    functionName: '_nextTokenId',
   })
+
+  // Function to fetch token URIs for all minted tokens
+  const fetchAllTokens = useCallback(async () => {
+    if (!nextTokenId) return
+
+    try {
+      const tokenIds = Array.from(
+        { length: Number(nextTokenId) },
+        (_, i) => BigInt(i)
+      )
+
+      // Create contract calls for each token
+      const contracts = tokenIds.map(tokenId => ({
+        address: CONTRACT_ADDRESS,
+        abi: aiArtNFTAbi,
+        functionName: 'tokenURI',
+        args: [tokenId]
+      }))
+
+      // We'll need to implement this properly with batch calls
+      // For now, using mock data
+      setArtworks(MOCK_ARTWORKS)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error fetching tokens:', error)
+      setIsLoading(false)
+    }
+  }, [nextTokenId])
+
+  // Listen for ArtFulfilled events to update gallery
+  useEffect(() => {
+    // In production, set up event listeners here
+    const eventListener = () => {
+      fetchAllTokens() // Refresh gallery when new art is generated
+    }
+
+    // Return cleanup function
+    return () => {
+      // Clean up event listeners
+    }
+  }, [fetchAllTokens])
 
   // Filter artworks
   const filteredArtworks = artworks.filter(art => {
     const matchesStyle = selectedStyle === "All" || art.style === selectedStyle
     const matchesSearch = art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         art.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         art.artist.toLowerCase().includes(searchQuery.toLowerCase())
+      art.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      art.artist.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesStyle && matchesSearch
   })
 
@@ -224,7 +268,7 @@ export function Gallery() {
             Discover {filteredArtworks.length} unique AI-generated artworks
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -236,7 +280,7 @@ export function Gallery() {
               className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-64"
             />
           </div>
-          
+
           <Button
             variant="outline"
             size="icon"
@@ -261,11 +305,10 @@ export function Gallery() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedStyle(style)}
-              className={`px-4 py-2 rounded-full border transition-all ${
-                selectedStyle === style
+              className={`px-4 py-2 rounded-full border transition-all ${selectedStyle === style
                   ? 'bg-purple-600 border-purple-500'
                   : 'bg-white/5 border-white/10 hover:border-purple-500/50'
-              }`}
+                }`}
             >
               {style}
             </motion.button>
@@ -300,11 +343,10 @@ export function Gallery() {
       <AnimatePresence>
         <motion.div
           layout
-          className={`grid ${
-            viewMode === "grid"
+          className={`grid ${viewMode === "grid"
               ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               : "grid-cols-1"
-          } gap-6`}
+            } gap-6`}
         >
           {sortedArtworks.map((art, index) => (
             <motion.div
@@ -366,13 +408,13 @@ export function Gallery() {
 }
 
 // Art Card Component
-function ArtCard({ 
-  art, 
+function ArtCard({
+  art,
   viewMode,
   onLike,
   onShare,
-  onViewDetail 
-}: { 
+  onViewDetail
+}: {
   art: any
   viewMode: "grid" | "list"
   onLike: (id: number) => void
@@ -383,10 +425,9 @@ function ArtCard({
     <Card className="group bg-white/5 border border-white/10 hover:border-purple-500/50 transition-all overflow-hidden">
       <CardContent className="p-0">
         {/* Image Container */}
-        <div 
-          className={`relative cursor-pointer ${
-            viewMode === "grid" ? "aspect-square" : "h-48"
-          }`}
+        <div
+          className={`relative cursor-pointer ${viewMode === "grid" ? "aspect-square" : "h-48"
+            }`}
           onClick={() => onViewDetail(art)}
         >
           <Image
@@ -396,7 +437,7 @@ function ArtCard({
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
-          
+
           {/* Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="absolute bottom-4 left-4 right-4">
@@ -490,13 +531,13 @@ function ArtCard({
 }
 
 // Art Detail Modal Component
-function ArtDetailModal({ 
-  art, 
-  isOpen, 
-  onClose, 
-  onLike, 
-  onShare 
-}: { 
+function ArtDetailModal({
+  art,
+  isOpen,
+  onClose,
+  onLike,
+  onShare
+}: {
   art: any
   isOpen: boolean
   onClose: () => void
@@ -533,7 +574,7 @@ function ArtDetailModal({
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
-        <div 
+        <div
           className="bg-gradient-to-br from-gray-900 to-black border border-white/10 rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
@@ -547,7 +588,7 @@ function ArtDetailModal({
                 className="object-cover"
                 sizes="50vw"
               />
-              
+
               {/* Image Controls */}
               <div className="absolute top-4 right-4 flex gap-2">
                 <Button
@@ -655,16 +696,16 @@ function ArtDetailModal({
                 {/* Actions */}
                 <div className="pt-6 border-t border-white/10">
                   <div className="flex gap-4">
-                    <Button 
-                      variant="gradient" 
+                    <Button
+                      variant="gradient"
                       size="lg"
                       className="flex-1"
                       onClick={() => console.log('Buy clicked')}
                     >
                       Buy Now
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="lg"
                       className="flex-1"
                       onClick={() => console.log('Make offer clicked')}
