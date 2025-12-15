@@ -10,7 +10,7 @@ import { CONTRACT_ADDRESS, aiArtNFTAbi } from '@/lib/web3'
 const STYLES = [
   "Cyberpunk",
   "Impressionist",
-  "Abstract",
+  "Abstract", 
   "Realistic",
   "Anime",
   "Oil Painting",
