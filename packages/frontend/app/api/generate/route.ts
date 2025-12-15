@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { HfInference } from '@huggingface/inference'
+import { InferenceClient } from '@huggingface/inference'
 import { create } from 'ipfs-http-client'
 
-const hf = new HfInference(process.env.HUGGING_FACE_TOKEN!)
+const hf: any = new InferenceClient(process.env.HUGGING_FACE_TOKEN)
 const ipfs = create({ url: 'https://ipfs.infura.io:5001/api/v0' })
 
 export async function POST(request: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const { prompt, style } = await request.json()
     
     // Generate image with Stable Diffusion
-    const image = await hf.textToImage({
+    const image: any = await hf.textToImage({
       inputs: `${prompt}, ${style} style, masterpiece, high quality`,
       model: "stabilityai/stable-diffusion-2-1",
       parameters: {
@@ -20,9 +20,20 @@ export async function POST(request: NextRequest) {
       }
     })
     
-    // Convert blob to buffer
-    const arrayBuffer = await image.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    let buffer: Buffer
+    if (typeof image === 'string') {
+      const base64 = image.includes('base64,') ? image.split('base64,')[1] : image
+      buffer = Buffer.from(base64, 'base64')
+    } else if (image?.arrayBuffer && typeof image.arrayBuffer === 'function') {
+      const arrayBuffer = await image.arrayBuffer()
+      buffer = Buffer.from(arrayBuffer)
+    } else if (image instanceof Uint8Array) {
+      buffer = Buffer.from(image)
+    } else if (image?.data && (image.data instanceof Uint8Array || Array.isArray(image.data))) {
+      buffer = Buffer.from(image.data)
+    } else {
+      throw new Error('Unsupported image response from HF inference')
+    }
     
     // Upload to IPFS
     const { cid } = await ipfs.add(buffer)
