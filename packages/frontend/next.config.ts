@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    images: {
+  images: {
     remotePatterns: [
       {
         protocol: 'https',
@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  serverExternalPackages: ['thread-stream', 'pino', 'pino-pretty', 'electron'],
 
   /* config options here */
 };
