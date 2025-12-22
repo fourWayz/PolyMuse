@@ -1,4 +1,3 @@
-"use client"
 import { createPublicClient, createWalletClient, custom, http } from 'viem'
 import { polygonAmoy } from 'viem/chains'
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
@@ -8,10 +7,18 @@ export const publicClient = createPublicClient({
   transport: http()
 })
 
-export const walletClient = createWalletClient({
-  chain: polygonAmoy,
-  transport: custom((window as any).ethereum!)
-})
+export function getWalletClient() {
+  if (typeof window === 'undefined') return null
+
+  if (!(window as any).ethereum) {
+    throw new Error('No injected wallet found')
+  }
+
+  return createWalletClient({
+    chain: polygonAmoy,
+    transport: custom((window as any).ethereum),
+  })
+}
 
 // Contract ABI
 export const aiArtNFTAbi = [
