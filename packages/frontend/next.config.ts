@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ['thread-stream', 'pino', 'pino-pretty', 'electron'],
+  serverExternalPackages: ['thread-stream', 'pino', 'pino-pretty', 'electron','@huggingface/inference','ipfs-http-client',],
 
   /* config options here */
 };
