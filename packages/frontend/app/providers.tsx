@@ -8,7 +8,7 @@ const queryClient = new QueryClient()
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={wagmiAdapter.config}>
+    <WagmiProvider config={wagmiAdapter}>
       <QueryClientProvider client={queryClient}>
         {children}
       </QueryClientProvider>

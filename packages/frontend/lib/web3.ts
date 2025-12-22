@@ -1,6 +1,7 @@
+"use client"
 import { createPublicClient, createWalletClient, custom, http } from 'viem'
 import { polygonAmoy } from 'viem/chains'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 
 export const publicClient = createPublicClient({
   chain: polygonAmoy,
@@ -950,8 +951,9 @@ export const aiArtNFTAbi = [
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!
 
 // Wagmi config
-export const wagmiAdapter = new WagmiAdapter({
-  networks: [polygonAmoy],
+export const wagmiAdapter = getDefaultConfig({
+  appName: 'PolyMuse',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
+  chains: [polygonAmoy],
   ssr: true,
-})
+});
