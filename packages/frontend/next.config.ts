@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ['thread-stream', 'pino', 'pino-pretty', 'electron','@huggingface/inference','ipfs-http-client',],
-
+  serverExternalPackages: ['thread-stream', 'pino', 'pino-pretty'],
+ output: 'standalone',
   /* config options here */
 };
 
