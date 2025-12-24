@@ -48,7 +48,7 @@ export default function Home() {
             className="flex items-center gap-2"
           >
             <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600" />
-            <span className="text-2xl font-bold">AI Art Studio</span>
+            <span className="text-2xl font-bold">PolyMuse</span>
           </motion.div>
           
           <div className="flex items-center gap-4">

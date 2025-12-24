@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   serverExternalPackages: ['thread-stream', 'pino', 'pino-pretty'],
- output: 'standalone',
   /* config options here */
 };
 
